@@ -2,7 +2,6 @@ require 'osx/cocoa'
 OSX.require_framework "AddressBook"
 
 class Person
-
   def initialize(ab_person_or_hash = nil)
     if ab_person_or_hash.is_a?(OSX::ABPerson)
       @ab_record = ab_person_or_hash
@@ -32,13 +31,24 @@ class Person
     end
   end
 
-  def method_missing(method, *args)
+  def method_missing(method, *args)        
     self.class_eval do
       define_method "#{method}" do
-        @ab_record.send(:valueForProperty, method.to_s.capitalize)
+        @ab_record.send(:valueForProperty, method.to_s.to_property_name)
       end
     end
 
     self.send("#{method}".to_sym)
+  end
+end
+
+class String
+  def to_property_name
+    case self
+    when "urls"
+      "URLs"
+    else 
+      capitalize
+    end
   end
 end
